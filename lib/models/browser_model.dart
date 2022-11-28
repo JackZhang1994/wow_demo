@@ -26,7 +26,7 @@ class BrowserSettings {
       {this.searchEngine = GoogleSearchEngine,
       this.homePageEnabled = false,
       this.customUrlHomePage = "",
-      this.debuggingEnabled = false});
+      this.debuggingEnabled = true});
 
   BrowserSettings copy() {
     return BrowserSettings(

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_browser/main.dart';
 import 'package:flutter_browser/models/webview_model.dart';
 import 'package:flutter_browser/util.dart';
+import 'package:flutter_browser/utils/js_channel/dart_to_js.dart';
+import 'package:flutter_browser/utils/js_channel/js_handler.dart';
 import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:path_provider/path_provider.dart';
@@ -160,8 +162,12 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
     initialSettings.disableLongPressContextMenuOnLinks = true;
     initialSettings.allowingReadAccessTo = WebUri('file://$WEB_ARCHIVE_DIR/');
 
+    // 开启JavaScript交互
+    initialSettings.javaScriptEnabled = true;
+
     return InAppWebView(
-      initialUrlRequest: URLRequest(url: widget.webViewModel.url),
+      initialFile: 'assets/htmls/test_html.html',
+      // initialUrlRequest: URLRequest(url: widget.webViewModel.url),
       initialSettings: initialSettings,
       windowId: widget.webViewModel.windowId,
       pullToRefreshController: _pullToRefreshController,
@@ -169,6 +175,9 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
       onWebViewCreated: (controller) async {
         initialSettings.transparentBackground = false;
         await controller.setSettings(settings: initialSettings);
+        // 添加JavaScript交互事件
+        JsHandler().addJavaScriptHandlers(controller);
+        DartToJs.instance.controller = controller;
 
         _webViewController = controller;
         widget.webViewModel.webViewController = controller;
@@ -200,7 +209,6 @@ class _WebViewTabState extends State<WebViewTab> with WidgetsBindingObserver {
       },
       onLoadStop: (controller, url) async {
         _pullToRefreshController?.endRefreshing();
-
         widget.webViewModel.url = url;
         widget.webViewModel.favicon = null;
         widget.webViewModel.loaded = true;
